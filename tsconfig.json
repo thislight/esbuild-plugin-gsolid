@@ -1,0 +1,9 @@
+{
+    "files": ["index.ts", "index.d.ts"],
+    "compilerOptions": {
+        "module": "ES2022",
+        "outDir": "dist",
+        "composite": true
+    },
+    "extends": "@tsconfig/node-lts/tsconfig.json",
+}
