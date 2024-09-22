@@ -31,12 +31,17 @@ pnpm -D esbuild-plugin-gsolid babel-preset-solid
 
 # YARN
 yarn add -D esbuild-plugin-gsolid babel-preset-solid
+
+# BUN
+bun add -D esbuild-plugin-gsolid babel-preset-solid
 ````
 
 ## What the plugin do
 
 - Load tsx/jsx files and transform them into JavaScript
 - Resolve solid-js package as "solid-js-file" namespace, load files and inject `gsolid/web-ponyfill` into them
+- Assume your code files are UTF-8 encoding
 
 ## LICENSE
+
 SPDX: Apache-2.0

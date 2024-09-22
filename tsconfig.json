@@ -1,7 +1,6 @@
 {
     "files": ["index.ts", "index.d.ts"],
     "compilerOptions": {
-        "module": "ES2022",
         "outDir": "dist",
         "composite": true
     },
