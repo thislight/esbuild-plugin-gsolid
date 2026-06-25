@@ -7,11 +7,14 @@ import path from "path";
 
 type GsolidPluginOpts = {};
 
-async function loadTSX(args: esbuild.OnLoadArgs) {
+async function loadTSX(
+    args: esbuild.OnLoadArgs,
+    target: esbuild.BuildOptions["target"],
+) {
     const buf = await fs.readFile(args.path);
     const result = await esbuild.transform(buf, {
         loader: "tsx",
-        target: "esnext",
+        target: target,
         jsx: "preserve",
         sourcemap: "inline",
     });
@@ -63,6 +66,7 @@ async function transformJSX({
         }
         return {
             contents: result.code || undefined,
+            loader: "js",
         };
     } catch (detail) {
         return {
@@ -119,7 +123,10 @@ export default function (): esbuild.Plugin {
             // Force to resolve gsolid/web-ponyfill imports (in solid-js-file:*)
             // to current node_modules gsolid
             build.onResolve(
-                { filter: /^gsolid\/web-ponyfill$/, namespace: "solid-js-file" },
+                {
+                    filter: /^gsolid\/web-ponyfill$/,
+                    namespace: "solid-js-file",
+                },
                 async (args) => {
                     if (
                         typeof args.pluginData == "object" &&
@@ -136,9 +143,9 @@ export default function (): esbuild.Plugin {
                             resolveDir: ".",
                             namespace: "file",
                             pluginData: {
-                                [UniqueKey]: {skip: true}
-                            }
-                        }
+                                [UniqueKey]: { skip: true },
+                            },
+                        },
                     );
                     return {
                         path: resolved.path,
@@ -146,7 +153,7 @@ export default function (): esbuild.Plugin {
                         warnings: resolved.warnings,
                         errors: resolved.errors,
                     };
-                }
+                },
             );
 
             build.onLoad(
@@ -154,7 +161,7 @@ export default function (): esbuild.Plugin {
                 async (args) => {
                     const content = await fs.readFile(args.path);
                     const mergedContent = new Uint8Array(
-                        patch.length + content.length
+                        patch.length + content.length,
                     );
                     mergedContent.set(patch);
                     mergedContent.set(content, patch.length);
@@ -163,7 +170,7 @@ export default function (): esbuild.Plugin {
                         watchFiles: [args.path],
                         resolveDir: path.dirname(args.path),
                     };
-                }
+                },
             );
 
             build.onLoad(
@@ -173,7 +180,7 @@ export default function (): esbuild.Plugin {
                     let jsxContent: string | Uint8Array;
                     const warnings: esbuild.Message[] = [];
                     if (isTSX) {
-                        const pluginRet = await loadTSX(args);
+                        const pluginRet = await loadTSX(args, opts.target);
                         for (const warn of pluginRet.warnings) {
                             warnings.push(warn);
                         }
@@ -190,7 +197,7 @@ export default function (): esbuild.Plugin {
                     ret.warnings = [...(ret.warnings || []), ...warnings];
                     ret.watchFiles = [args.path];
                     return ret;
-                }
+                },
             );
         },
     };
